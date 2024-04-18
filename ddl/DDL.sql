@@ -1,3 +1,4 @@
+SET search_path TO project;
 drop table if exists Users cascade;
 create table Users
 (
@@ -31,13 +32,14 @@ create table ItemType
 drop table if exists ItemVersions cascade;
 create table ItemVersions
 (
-    ChangeDateTime timestamp primary key default now() not null,
+    ChangeDateTime timestamp default now() not null,
     ItemID integer not null,
     Name varchar(1024) not null,
     Icon varchar(255),
     Description text,
     ItemFiles text not null,
-    ChangeLog text not null
+    ChangeLog text not null,
+	primary key(ChangeDateTime, ItemID)
 );
 
 drop table if exists Items cascade;
@@ -48,13 +50,19 @@ create table Items
     Name varchar(1024) not null,
     Icon varchar(255),
     Description text,
-    PostDate timestamp not null references ItemVersions(ChangeDateTime) check (PostDate >= now()),
-    UpdateDate timestamp not null references ItemVersions(ChangeDateTime) check (UpdateDate >= PostDate),
-    CurrentFiles text not null
+    PostDate timestamp,
+    UpdateDate timestamp,
+    CurrentFiles text not null,
+	unique(UpdateDate, ItemID),
+	unique(PostDate, ItemID)
 );
-
 alter table ItemVersions add constraint fk
     foreign key (ItemID) references Items(ItemID);
+	
+alter table Items add constraint fk2
+    foreign key (PostDate, ItemID) references ItemVersions(ChangeDateTime, ItemID),
+	add constraint fk
+    foreign key (UpdateDate, ItemID) references ItemVersions(ChangeDateTime, ItemID);
 
 drop table if exists Collections cascade;
 create table Collections
