@@ -21,4 +21,4 @@ from appuserrelations as rel
 where rel.type = 0
 group by rel.appid) as rel
 left join apps on apps.appid = rel.appid
-order by rel.owners_count
+order by rel.owners_count;
